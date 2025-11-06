@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Chatbot</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">🤖 AI Chatbot</div>
+
+    <div class="chat-box" id="chat-box">
+      <div class="message bot">
+        Hello! 👋 I’m your AI assistant. How can I help you today?
+      </div>
+    </div>
+
+    <div class="chat-input">
+      <input id="user-input" type="text" placeholder="Type your message..." autocomplete="off">
+      <button id="send-btn">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
+    const chatBox = document.getElementById("chat-box");
+
+    function addMessage(role, text) {
+      const msg = document.createElement("div");
+      msg.classList.add("message", role);
+      msg.textContent = text;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    sendBtn.addEventListener("click", async () => {
+      const userText = input.value.trim();
+      if (!userText) return;
+      addMessage("user", userText);
+      input.value = "";
+
+      // Show typing indicator
+      const typing = document.createElement("div");
+      typing.classList.add("message", "bot");
+      typing.textContent = "Typing...";
+      chatBox.appendChild(typing);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      // Send message to Flask backend
+      try {
+        const response = await fetch("/get", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ msg: userText })
+        });
+        const botReply = await response.text();
+        typing.remove();
+        addMessage("bot", botReply);
+      } catch (err) {
+        typing.remove();
+        addMessage("bot", "⚠️ Error: Unable to reach the server.");
+      }
+    });
+
+    input.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") sendBtn.click();
+    });
+  </script>
+</body>
+</html>
