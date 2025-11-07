@@ -55,6 +55,14 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Clean up Docker disk space
+        if: always()
+        run: |
+          docker stop $(docker ps -aq) || true
+          docker system prune -a --volumes -f
+          df -h
+
+
       - name: Pull and Run Docker Container
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
