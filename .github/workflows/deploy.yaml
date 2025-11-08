@@ -38,8 +38,7 @@ jobs:
   Continuous-Deployment:
     name: Deploy to EC2 Instance
     needs: Continuous-Integration
-    runs-on: self-hosted  # Your EC2 instance must be registered as a self-hosted runner
-
+    runs-on: self-hosted  
     steps:
       - name: Checkout
         uses: actions/checkout@v4
